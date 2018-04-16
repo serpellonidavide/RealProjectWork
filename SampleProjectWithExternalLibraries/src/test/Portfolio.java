@@ -88,20 +88,8 @@ public class Portfolio {
 	for(int i =0; i< History.size(); i++) {
 		InitialState[i] = History.get(i).get(History.get(i).size()-1).getAdjClose().doubleValue();
 	}
-	return InitialState;
-
-
-
-
-
-
-
-
-
-
-
-
-}
+	return InitialState;}
+	double test=0.0;
 
 }
 		
