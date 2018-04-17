@@ -65,6 +65,7 @@ public class MainClass {
 		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
 		//System.out.println(provino);
 		System.out.println(savings.quantitiesList.get(0));
+		String a="porca vacca aggiornati";
 		
 		
 		
