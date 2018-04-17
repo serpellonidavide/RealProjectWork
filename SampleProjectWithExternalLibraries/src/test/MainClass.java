@@ -49,8 +49,8 @@ public class MainClass {
 
 		
 		Portfolio savings =new Portfolio();
-		savings.addToPortfolio(Google);
-		savings.addToPortfolio(Tesla);
+		savings.addToPortfolio(Google,400);
+		savings.addToPortfolio(Tesla,-250);
 		
 	
 		List<List<HistoricalQuote>> ValoriStorici =savings.getHistory(from, to);
@@ -63,8 +63,8 @@ public class MainClass {
 		double[][] corr = savings.getLogYieldCorrelationMatrix(hshs);
 		System.out.println(v[0]);
 		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
-		System.out.println(provino);
-		
+		//System.out.println(provino);
+		System.out.println(savings.quantitiesList.get(0));
 
 		
 		
