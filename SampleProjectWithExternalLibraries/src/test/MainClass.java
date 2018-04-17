@@ -44,6 +44,9 @@ public class MainClass {
 		Stock Apple = YahooFinance.get("AAPL");
 		Stock GeneralMotors = YahooFinance.get("GM");
 		
+		System.out.println(Tesla);
+		System.out.println(Google);
+		
 
 		//Portfolio costruction
 
