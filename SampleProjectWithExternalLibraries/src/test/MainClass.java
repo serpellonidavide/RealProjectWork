@@ -37,6 +37,7 @@ public class MainClass {
 	public static void main(String[] args) throws IOException, CalculationException {
 		
 		CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+		//https://stackoverflow.com/questions/11022934/getting-java-net-protocolexception-server-redirected-too-many-times-error
 		
 		
 		Calendar from = Calendar.getInstance();
@@ -73,7 +74,7 @@ public class MainClass {
 		System.out.println(v[0]);
 		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
 		//System.out.println(provino);
-		System.out.println(savings.quantitiesList.get(0));
+		System.out.println(savings.getInitialState(ValoriStorici)[0]);
 		
 		
 		
