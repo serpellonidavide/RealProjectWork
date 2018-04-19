@@ -27,12 +27,13 @@ import yahoofinance.histquotes.HistoricalQuote;
 public class Portfolio {
 	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
 	public int numberofAssets=portfolio.size();
-	public ArrayList<Double> quantities = new ArrayList<Double>();
+
+	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
 	
 	public ArrayList<Stock> addToPortfolio (Stock stock1, double quantities){
 		this.portfolio.add(stock1);
 		this.numberofAssets=portfolio.size();
-		this.quantities.add(quantities);
+		this.quantitiesList.add(quantities);
 		return portfolio;
 	}
 	public List<List<HistoricalQuote>> getHistory(Calendar from, Calendar to) throws IOException{
@@ -88,7 +89,7 @@ public class Portfolio {
 		
 	double[] InitialState = new double[History.size()];
 	for(int i =0; i< History.size(); i++) {
-		InitialState[i] = History.get(i).get(History.get(i).size()-1).getAdjClose().doubleValue()*this.quantities.get(i).doubleValue();
+		InitialState[i] = History.get(i).get(History.get(i).size()-1).getAdjClose().doubleValue()*quantitiesList.get(i);
 	}
 	return InitialState;}
 
