@@ -1,6 +1,9 @@
 package test;
 
 import java.io.IOException;
+import java.net.CookieHandler;
+import java.net.CookieManager;
+import java.net.CookiePolicy;
 import java.util.*;
 
 
@@ -32,6 +35,9 @@ public class MainClass {
 
 	
 	public static void main(String[] args) throws IOException, CalculationException {
+		
+		CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
+		
 		
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
