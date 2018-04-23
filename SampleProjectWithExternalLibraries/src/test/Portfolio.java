@@ -27,8 +27,16 @@ import yahoofinance.histquotes.HistoricalQuote;
 public class Portfolio {
 	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
 	public int numberofAssets=portfolio.size();
-
 	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
+	
+	public Portfolio(Stock... stocks){
+		for (Stock stock :stocks){
+			System.out.println("Immettere il numero di azioni per il primo titolo");
+			portfolio.add(stock);
+		}
+		//for (double quantity:quantities){
+			//quantitiesList.add(quantity);}
+	}
 	
 	public ArrayList<Stock> addToPortfolio (Stock stock1, double quantities){
 		this.portfolio.add(stock1);
