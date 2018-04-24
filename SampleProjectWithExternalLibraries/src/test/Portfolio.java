@@ -27,22 +27,29 @@ import yahoofinance.histquotes.HistoricalQuote;
 public class Portfolio {
 	
 	//Class fields
-	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
-	public int numberofAssets=portfolio.size();
-	public List<List<HistoricalQuote>> History;
-	public double[][] log_returnMatrix;
-	public double[][] logcorrelationMatrix;
-	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
+
+	public double[][] logreturnMatrix;
+	public double[][] logreturncorrelationMatrix;
 	public double[] volatilities;
 	public double[] initialState;
+	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
+	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
+	public List<List<HistoricalQuote>> History;
+	public int numberofAssets=portfolio.size();
+
 	
 	//Constructors
 	public ArrayList<Stock> addToPortfolio (Stock stock1, double quantities){
+		if(quantities == 0) {
+			throw new IllegalArgumentException("Number of stocks 0");
+		} else {
 		this.portfolio.add(stock1);
 		this.numberofAssets=portfolio.size();
 		this.quantitiesList.add(quantities);
+		
 		return portfolio;
-	}
+		}
+		}
 	
 	//Class Methods
 	public void getInfo(Calendar from, Calendar to) throws IOException{
@@ -51,11 +58,11 @@ public class Portfolio {
 			History.add(element.getHistory(from, to, Interval.DAILY));
 		}
 		this.History=History;
-		this.log_returnMatrix = getLogYield(History);
+		this.logreturnMatrix = getLogYield(History);
 		if(numberofAssets!=1) {
-			this.logcorrelationMatrix = getLogYieldCorrelationMatrix(log_returnMatrix);
+			this.logreturncorrelationMatrix = getLogYieldCorrelationMatrix(logreturnMatrix);
 			}
-		this.volatilities= volatilities(History);
+		this.volatilities= getVolatilities(History);
 		this.initialState= getInitialState(History);
 		}
 	
@@ -86,7 +93,7 @@ public class Portfolio {
 		return log_returnArray;
 		}
 		
-	private double[] volatilities(List<List<HistoricalQuote>> History) {
+	private double[] getVolatilities(List<List<HistoricalQuote>> History) {
 		
 		double[] volat = new double[History.size()];
 		Covariance d = new Covariance();
