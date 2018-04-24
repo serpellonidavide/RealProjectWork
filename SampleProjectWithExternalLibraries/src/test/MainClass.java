@@ -8,6 +8,7 @@ import java.util.*;
 
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloMultiAssetBlackScholesModel;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
@@ -55,19 +56,19 @@ public class MainClass {
 		
 		Portfolio savings =new Portfolio();
 		savings.addToPortfolio(Google, 100);
-		savings.addToPortfolio(Tesla, 20);
-		savings.addToPortfolio(Facebook, 400);
-		savings.addToPortfolio(Apple, 50);
-		savings.addToPortfolio(GeneralMotors, 700);
+		//savings.addToPortfolio(Tesla, 20);
+		//savings.addToPortfolio(Facebook, 400);
+		//savings.addToPortfolio(Apple, 50);
+		//savings.addToPortfolio(GeneralMotors, 700);
 		
 		savings.getInfo(from, to);
 		
 		//Linearized Loss Test
 		
-		System.out.println("Il var è " + LinearizedLoss.getVar(savings, 1, 0.95));
+		//System.out.println("Il var è " + LinearizedLoss.getVar(savings, 1, 0.95));
 		System.out.println("La varianza è " + LinearizedLoss.Variance(savings, 252));
-		System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
-		System.out.println(savings.portfoliovalue);
+		//System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
+		//System.out.println(savings.portfoliovalue);
 		
 
 	
@@ -76,9 +77,10 @@ public class MainClass {
 		double[] v = savings.volatilities;
 		double[][] corr = savings.logreturncorrelationMatrix;
 	
-		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10000,r,0.0,v,corr);
-		System.out.println(provino.toString());
-		System.out.println(provino.getAssetValue(252, 0).getAverage());
+		MonteCarloBlackScholesModel provino = new MonteCarloBlackScholesModel(h,20000,r[0],0,v[0]);
+		//System.out.println(provino.toString());
+		System.out.println(provino.getAssetValue(252, 0).getSampleVariance());
+		
 
 	}	
 		
