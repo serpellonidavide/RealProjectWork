@@ -31,6 +31,7 @@ public class Portfolio {
 	public double[][] logreturncorrelationMatrix;
 	public double[] volatilities;
 	public double[] initialState;
+	public double portfoliovalue;
 	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
 	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
 	public List<List<HistoricalQuote>> History;
@@ -64,6 +65,8 @@ public class Portfolio {
 			}
 		this.volatilities= getVolatilities(History);
 		this.initialState= getInitialState(History);
+		this.portfoliovalue= getPortfolioValue();
+		
 		}
 	
 	//Public Methods
@@ -119,7 +122,18 @@ public class Portfolio {
 	for(int i =0; i< History.size(); i++) {
 		InitialState[i] = History.get(i).get(History.get(i).size()-1).getAdjClose().doubleValue()*quantitiesList.get(i);
 	}
+	
 	return InitialState;}
+	
+	
+	private double getPortfolioValue(){
+		double  value=0;
+		for (int i=0;i<numberofAssets;i++){
+			
+			value+=initialState[i];
+		}
+		return value;
+	}
 
 }
 		

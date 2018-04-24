@@ -15,7 +15,7 @@ public class LinearizedLoss {
 		for(int i=0; i < savings.numberofAssets; i++) {
 			double ExpectationXasset = savings.initialState[i]
 					*(-Math.pow(savings.volatilities[i], 2)/2)*delta_t;
-			sum =+ ExpectationXasset;
+			sum += ExpectationXasset;
 			
 		}
 		return -sum;
@@ -33,7 +33,7 @@ public class LinearizedLoss {
 			for(int j=0; j< savings.numberofAssets; j++) {
 				double c = savings.initialState[i]*savings.initialState[j]*
 						savings.logreturncorrelationMatrix[i][j]*savings.volatilities[i]*savings.volatilities[j]*delta_t;
-				sum =+ c;
+				sum += c;
 			}
 		}
 		return sum;
