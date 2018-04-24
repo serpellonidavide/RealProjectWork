@@ -16,7 +16,6 @@ import net.finmath.time.TimeDiscretizationInterface;
 
 import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
-import yahoofinance.histquotes.HistoricalQuote;
 
 
 
@@ -63,19 +62,23 @@ public class MainClass {
 		
 		savings.getInfo(from, to);
 		
-		System.out.println(LinearizedLoss.getVar(savings, 252, 0.95));
-		System.out.println(LinearizedLoss.Variance(savings, 252));
-		System.out.println(LinearizedLoss.Mean(savings, 252));
+		//Linearized Loss Test
+		
+		System.out.println("Il var è " + LinearizedLoss.getVar(savings, 1, 0.95));
+		System.out.println("La varianza è " + LinearizedLoss.Variance(savings, 252));
+		System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
+		System.out.println(savings.portfoliovalue);
 		
 
 	
-		//TimeDiscretizationInterface h = new TimeDiscretization(0,1000,1);
-		//double[] r = savings.getInitialState(ValoriStorici);
-		//double[] v = savings.volatilities(ValoriStorici);
-		//double[][] hshs = savings.getLogYield(ValoriStorici);
-		//double[][] corr = savings.getLogYieldCorrelationMatrix(hshs);
-		//System.out.println(v[0]);
-		//MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
+		TimeDiscretizationInterface h = new TimeDiscretization(0,252,1);
+		double[] r = savings.initialState;
+		double[] v = savings.volatilities;
+		double[][] corr = savings.logreturncorrelationMatrix;
+	
+		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10000,r,0.0,v,corr);
+		System.out.println(provino.toString());
+		System.out.println(provino.getAssetValue(252, 0).getAverage());
 
 	}	
 		
