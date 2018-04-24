@@ -51,32 +51,37 @@ public class MainClass {
 		Stock Apple = YahooFinance.get("AAPL");
 		Stock GeneralMotors = YahooFinance.get("GM");
 
-		System.out.println(Tesla);
-		System.out.println(Google);
+		//System.out.println(Tesla);
+		//System.out.println(Google);
 		
 
 		//Portfolio costruction
 
 		
 		Portfolio savings =new Portfolio();
-		savings.addToPortfolio(Google,400);
-		savings.addToPortfolio(Tesla,-250);
+		savings.addToPortfolio(Google, 100);
+		
 		
 	
-		List<List<HistoricalQuote>> ValoriStorici =savings.getHistory(from, to);
+		savings.getInfo(from, to);
+		
+		System.out.println(LinearizedLoss.Mean(savings, 252));
+		System.out.println(LinearizedLoss.Variance(savings, 252));
 
 	
 		TimeDiscretizationInterface h = new TimeDiscretization(0,1000,1);
-		double[] r = savings.getInitialState(ValoriStorici);
-		double[] v = savings.volatilities(ValoriStorici);
-		double[][] hshs = savings.getLogYield(ValoriStorici);
-		double[][] corr = savings.getLogYieldCorrelationMatrix(hshs);
-		System.out.println(v[0]);
-		MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
-		//System.out.println(provino);
-		System.out.println(savings.getInitialState(ValoriStorici)[0]);
+		//double[] r = savings.getInitialState(ValoriStorici);
+		//double[] v = savings.volatilities(ValoriStorici);
+		//double[][] hshs = savings.getLogYield(ValoriStorici);
+		//double[][] corr = savings.getLogYieldCorrelationMatrix(hshs);
+		//System.out.println(v[0]);
+		//MonteCarloMultiAssetBlackScholesModel provino = new MonteCarloMultiAssetBlackScholesModel(h,10,r,0.0,v,corr);
 		
+		System.out.println(savings.volatilities);
+		//System.out.println(savings.volatility*savings.volatility);
+		//System.out.println(savings.getInitialState(ValoriStorici)[0]);
 		
+		System.out.println();
 		
 	}	
 		

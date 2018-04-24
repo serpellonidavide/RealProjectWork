@@ -25,32 +25,41 @@ import yahoofinance.histquotes.HistoricalQuote;
  */
 
 public class Portfolio {
+	
+	//Class fields
 	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
 	public int numberofAssets=portfolio.size();
+	public List<List<HistoricalQuote>> History;
+	public double[][] log_returnMatrix;
+	public double[][] logcorrelationMatrix;
 	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
+	public double[] volatilities;
+	public double[] initialState;
 	
-	public Portfolio(Stock... stocks){
-		for (Stock stock :stocks){
-			System.out.println("Immettere il numero di azioni per il primo titolo");
-			portfolio.add(stock);
-		}
-		//for (double quantity:quantities){
-			//quantitiesList.add(quantity);}
-	}
-	
+	//Constructors
 	public ArrayList<Stock> addToPortfolio (Stock stock1, double quantities){
 		this.portfolio.add(stock1);
 		this.numberofAssets=portfolio.size();
 		this.quantitiesList.add(quantities);
 		return portfolio;
 	}
-	public List<List<HistoricalQuote>> getHistory(Calendar from, Calendar to) throws IOException{
+	
+	//Class Methods
+	public void getInfo(Calendar from, Calendar to) throws IOException{
 		List<List<HistoricalQuote>> History = new ArrayList<List<HistoricalQuote>>();
 		for(Stock element:this.portfolio){
 			History.add(element.getHistory(from, to, Interval.DAILY));
 		}
-		return History;
+		this.History=History;
+		this.log_returnMatrix = getLogYield(History);
+		if(numberofAssets!=1) {
+			this.logcorrelationMatrix = getLogYieldCorrelationMatrix(log_returnMatrix);
+			}
+		this.volatilities= volatilities(History);
+		this.initialState= getInitialState(History);
 		}
+	
+	//Public Methods
 	
 	public double[][] getClosingPrices(List<List<HistoricalQuote>> History) {
 		double[][] closePriceArray=new double[History.size()][];
@@ -63,7 +72,9 @@ public class Portfolio {
 		return closePriceArray;	
 		}
 	
-	public double[][] getLogYield(List<List<HistoricalQuote>> History) {
+	//Private Methods
+	
+	private double[][] getLogYield(List<List<HistoricalQuote>> History) {
 		
 		double[][] log_returnArray = new double[History.size()][];
 		for (int index_of_asset=0;index_of_asset<History.size();index_of_asset++){
@@ -75,7 +86,7 @@ public class Portfolio {
 		return log_returnArray;
 		}
 		
-	public double[] volatilities(List<List<HistoricalQuote>> History) {
+	private double[] volatilities(List<List<HistoricalQuote>> History) {
 		
 		double[] volat = new double[History.size()];
 		Covariance d = new Covariance();
@@ -86,14 +97,16 @@ public class Portfolio {
 		return volat;
 		}
 	
-	public double[][] getLogYieldCorrelationMatrix(double[][] log_returnMatrix){
+	private double[][] getLogYieldCorrelationMatrix(double[][] log_returnMatrix)
+	{
 		Array2DRowRealMatrix log_returnRealMatrix=new Array2DRowRealMatrix(log_returnMatrix);
 		RealMatrix log_returnRealMatrixT= log_returnRealMatrix.transpose();
 		PearsonsCorrelation log_returnCorrelationMatrix= new PearsonsCorrelation(log_returnRealMatrixT);
+		
 		return log_returnCorrelationMatrix.getCorrelationMatrix().getData();
 	}
 	
-	public double[] getInitialState(List<List<HistoricalQuote>> History) {
+	private double[] getInitialState(List<List<HistoricalQuote>> History) {
 		
 	double[] InitialState = new double[History.size()];
 	for(int i =0; i< History.size(); i++) {
