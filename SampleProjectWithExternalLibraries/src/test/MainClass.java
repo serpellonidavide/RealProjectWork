@@ -8,8 +8,10 @@ import java.util.*;
 
 
 import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.assetderivativevaluation.AssetModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloMultiAssetBlackScholesModel;
+import net.finmath.stochastic.RandomVariableInterface;
 import net.finmath.time.TimeDiscretization;
 import net.finmath.time.TimeDiscretizationInterface;
 
@@ -56,17 +58,17 @@ public class MainClass {
 		
 		Portfolio savings =new Portfolio();
 		savings.addToPortfolio(Google, 100);
-		//savings.addToPortfolio(Tesla, 20);
-		//savings.addToPortfolio(Facebook, 400);
-		//savings.addToPortfolio(Apple, 50);
-		//savings.addToPortfolio(GeneralMotors, 700);
+		savings.addToPortfolio(Tesla, 20);
+		savings.addToPortfolio(Facebook, 400);
+		savings.addToPortfolio(Apple, 50);
+		savings.addToPortfolio(GeneralMotors, 700);
 		
 		savings.getInfo(from, to);
 		
 		//Linearized Loss Test
 		
-		//System.out.println("Il var è " + LinearizedLoss.getVar(savings, 1, 0.95));
-		System.out.println("La varianza è " + LinearizedLoss.Variance(savings, 252));
+		System.out.println("Il var è " + LinearizedLoss.getVar(savings, 252, 0.95));
+		//System.out.println("La varianza è " + LinearizedLoss.Variance(savings, 252));
 		//System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
 		//System.out.println(savings.portfoliovalue);
 		
@@ -77,9 +79,30 @@ public class MainClass {
 		double[] v = savings.volatilities;
 		double[][] corr = savings.logreturncorrelationMatrix;
 	
-		MonteCarloBlackScholesModel provino = new MonteCarloBlackScholesModel(h,20000,r[0],0,v[0]);
-		//System.out.println(provino.toString());
-		System.out.println(provino.getAssetValue(252, 0).getSampleVariance());
+		AssetModelMonteCarloSimulationInterface provino = new MonteCarloMultiAssetBlackScholesModel(h,20000,r,0.0,v,corr);
+		RandomVariableInterface Goog = provino.getAssetValue(252, 0);
+		RandomVariableInterface Tesl = provino.getAssetValue(252, 1);
+		RandomVariableInterface FB = provino.getAssetValue(252, 2);
+		RandomVariableInterface App = provino.getAssetValue(252, 3);
+		RandomVariableInterface GM = provino.getAssetValue(252, 4);
+		
+		
+		
+		RandomVariableInterface Somma = Goog.add(Tesl).add(FB).add(App).add(GM).sub(savings.portfoliovalue);
+		
+		
+		
+		
+		System.out.println("Il var secondo MOnteCarlo è " + ( -Somma.getQuantile(0.95)));
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 
 	}	
