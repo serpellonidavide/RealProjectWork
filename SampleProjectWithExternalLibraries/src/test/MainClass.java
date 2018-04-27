@@ -8,6 +8,9 @@ import java.util.*;
 
 
 import net.finmath.exception.CalculationException;
+import net.finmath.functions.AnalyticFormulas;
+import net.finmath.montecarlo.assetderivativevaluation.products.EuropeanOption;
+import net.finmath.modelling.Model;
 import net.finmath.montecarlo.assetderivativevaluation.AssetModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloMultiAssetBlackScholesModel;
@@ -72,9 +75,9 @@ public class MainClass {
 		//System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
 		//System.out.println(savings.portfoliovalue);
 		
-
+		//MonteCarlo Var Test
 	
-		TimeDiscretizationInterface h = new TimeDiscretization(0,252,1);
+		TimeDiscretizationInterface h = new TimeDiscretization(0,365,1);
 		double[] r = savings.initialState;
 		double[] v = savings.volatilities;
 		double[][] corr = savings.logreturncorrelationMatrix;
@@ -92,12 +95,19 @@ public class MainClass {
 		
 		
 		
+		System.out.println(Somma.getVariance());
+		System.out.println("Il var secondo MonteCarlo è " + ( -Somma.getQuantile(0.95)));
 		
-		System.out.println("Il var secondo MOnteCarlo è " + ( -Somma.getQuantile(0.95)));
+		//Option Valuation
 		
+		TimeDiscretizationInterface q = new TimeDiscretization(0,365,1);
+		MonteCarloBlackScholesModel prova2 = new  MonteCarloBlackScholesModel(q,20000,savings.initialState[0]/savings.quantitiesList.get(0),0,savings.volatilities[0]);
+		OptionVar Ex2 = new OptionVar(365,0);
+		System.out.println(Ex2.getValue(365,provino).getAverage());
 		
+		System.out.println(AnalyticFormulas.blackScholesOptionValue(savings.initialState[0],0,savings.volatilities[0],365,savings.initialState[0]/savings.quantitiesList.get(0)));
 		
-		
+		System.out.println(Ex2.getOptionPayoff(180, prova2, Google.getQuote().getPreviousClose().doubleValue()).getAverage());
 		
 		
 		
