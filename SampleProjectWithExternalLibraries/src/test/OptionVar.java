@@ -1,44 +1,91 @@
 package test;
 
 import net.finmath.exception.CalculationException;
+import net.finmath.functions.AnalyticFormulas;
 import net.finmath.montecarlo.RandomVariable;
 import net.finmath.montecarlo.assetderivativevaluation.AssetModelMonteCarloSimulationInterface;
+import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.products.EuropeanOption;
 import net.finmath.stochastic.RandomVariableInterface;
 
+
 public class OptionVar extends EuropeanOption{
+	
+	public AssetModelMonteCarloSimulationInterface model;
+	public StockParams stock1;
+	public double maturity;
+	public double strike;
 
-
-
-	public OptionVar(double maturity, double strike) {
+	public OptionVar(StockParams stock1, MonteCarloBlackScholesModel model, double maturity, double strike) {
 		super(maturity, strike);
-		// TODO Auto-generated constructor stub
+		this.model=model;
+		this.stock1=stock1;
+		this.maturity=maturity;
+		this.strike=strike;
 	}
 
-	private RandomVariableInterface getLogPricesSimulation(double time, AssetModelMonteCarloSimulationInterface model) throws CalculationException {
+	private RandomVariableInterface getDeltaLogPricesSimulation(double time) throws CalculationException {
 		
-		RandomVariableInterface got = model.getAssetValue(time, 0).log();
+		RandomVariableInterface got = model.getAssetValue(time, 0).log().sub(Math.log(stock1.InitialValue));
 		
 		return got;
 		
 	}
 	
-	public RandomVariableInterface getOptionPayoff(double time, AssetModelMonteCarloSimulationInterface model, double strike) throws CalculationException	{
+	public double getVarFullValuation(double time, AssetModelMonteCarloSimulationInterface model) throws CalculationException {
 		
-	RandomVariableInterface LogPricesSimulation = getLogPricesSimulation(time,model);
-	double[] gg = new double[model.getNumberOfPaths()];
-	
-	for(int i=0; i < model.getNumberOfPaths(); i++) {
-		if(LogPricesSimulation.get(i) - strike != 0) {
-		gg[i] = LogPricesSimulation.get(i) - strike;
-		} else {
-			gg[i] =0;
-				}
+		double BS = AnalyticFormulas.blackScholesOptionValue(stock1.InitialValue,0,stock1.volatility,365,strike);
+		
+		RandomVariableInterface simulation = model.getAssetValue(time, 0);
+		double[] vector = new double[simulation.size()];
+		for( int i = 0; i < simulation.size(); i++) {
+			
+			double pricesimulation = simulation.get(i);
+			vector[i] = -(AnalyticFormulas.blackScholesOptionValue(pricesimulation,0,stock1.volatility,365-time,strike)-BS);
+			
 		}
-	RandomVariable OptionPayoff = new RandomVariable(time, gg);
-	
-	return OptionPayoff;
+		
+		RandomVariableInterface loss = new RandomVariable(time,vector);
+		return loss.getQuantile(0.05);
+		
 	}
+	
+	public double gerVarDeltaGamma(double time, double alpha) throws CalculationException {
+		
+		
+		RandomVariableInterface pricesimulation = getDeltaLogPricesSimulation(time);
+		double delta = AnalyticFormulas.blackScholesOptionDelta(stock1.InitialValue, 0.0, stock1.volatility, this.maturity, this.strike);
+		double gamma = AnalyticFormulas.blackScholesOptionGamma(stock1.InitialValue, 0.0, stock1.volatility, this.maturity, this.strike);
+		RandomVariableInterface firstaproximation = pricesimulation.mult(delta).mult(stock1.InitialValue);
+		RandomVariableInterface secondaproximation = pricesimulation.pow(2).mult(stock1.InitialValue*(gamma*stock1.InitialValue+delta)).div(2);
+		
+		RandomVariableInterface loss = (firstaproximation.add(secondaproximation)).mult(-1);
+		
+		return loss.getQuantile(alpha);
+		
+	}
+	public double gerVarDelta(double time, double alpha) throws CalculationException {
+		
+		
+		RandomVariableInterface pricesimulation = getDeltaLogPricesSimulation(time);
+		double delta = AnalyticFormulas.blackScholesOptionDelta(stock1.InitialValue, 0.0, stock1.volatility, this.maturity, this.strike);
+	
+		RandomVariableInterface firstaproximation = pricesimulation.mult(delta).mult(stock1.InitialValue);
+	
+		RandomVariableInterface loss = firstaproximation.mult(-1);
+		
+		return loss.getQuantile(alpha);
+		
+		
+	}
+	
 }
+	
+	
+	
+	
+
+	
+	
 
 
