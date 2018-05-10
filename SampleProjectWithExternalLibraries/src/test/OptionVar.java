@@ -34,14 +34,14 @@ public class OptionVar extends EuropeanOption{
 	
 	public double getVarFullValuation(double time, AssetModelMonteCarloSimulationInterface model) throws CalculationException {
 		
-		double BS = AnalyticFormulas.blackScholesOptionValue(stock1.InitialValue,0,stock1.volatility,365,strike);
+		double BS = AnalyticFormulas.blackScholesOptionValue(stock1.InitialValue,0,stock1.volatility,1,strike);
 		
 		RandomVariableInterface simulation = model.getAssetValue(time, 0);
 		double[] vector = new double[simulation.size()];
 		for( int i = 0; i < simulation.size(); i++) {
 			
 			double pricesimulation = simulation.get(i);
-			vector[i] = -(AnalyticFormulas.blackScholesOptionValue(pricesimulation,0,stock1.volatility,365-time,strike)-BS);
+			vector[i] = -(AnalyticFormulas.blackScholesOptionValue(pricesimulation,0,stock1.volatility,1-time,strike)-BS);
 			
 		}
 		

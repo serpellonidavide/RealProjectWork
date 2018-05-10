@@ -51,7 +51,7 @@ public class StockParams extends Stock {
 			vector[i] = Math.log(History.get(i+1).getAdjClose().doubleValue())-Math.log(History.get(i).getAdjClose().doubleValue());
 		}
 		RandomVariable logReturns = new RandomVariable(0,vector);
-		return logReturns.getStandardDeviation();
+		return logReturns.getStandardDeviation()*Math.sqrt(252);
 		
 	}
 	

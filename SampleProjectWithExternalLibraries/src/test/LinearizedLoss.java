@@ -13,7 +13,7 @@ public class LinearizedLoss {
 	public static double Mean(Portfolio savings, double delta_t) throws IOException {
 		double sum = 0;
 		for(int i=0; i < savings.numberofAssets; i++) {
-			double ExpectationXasset = savings.initialState[i]
+			double ExpectationXasset = savings.initialStates[i]
 					*(-Math.pow(savings.volatilities[i], 2)/2)*delta_t;
 			sum += ExpectationXasset;
 			
@@ -25,13 +25,13 @@ public class LinearizedLoss {
 		
 		double sum = 0;
 		if(savings.numberofAssets==1) {
-			double d = savings.volatilities[0]*savings.volatilities[0]*savings.initialState[0]
-					*savings.initialState[0]*delta_t;
+			double d = savings.volatilities[0]*savings.volatilities[0]*savings.initialStates[0]
+					*savings.initialStates[0]*delta_t;
 			return d;
 		} else {
 		for(int i=0; i < savings.numberofAssets; i++) {
 			for(int j=0; j< savings.numberofAssets; j++) {
-				double c = savings.initialState[i]*savings.initialState[j]*
+				double c = savings.initialStates[i]*savings.initialStates[j]*
 						savings.logreturncorrelationMatrix[i][j]*savings.volatilities[i]*savings.volatilities[j]*delta_t;
 				sum += c;
 			}
@@ -45,6 +45,7 @@ public class LinearizedLoss {
 		NormalDistribution normal = new NormalDistribution();
 		double var = LinearizedLoss.Mean(savings, delta_t)+Math.sqrt(LinearizedLoss.Variance(savings, delta_t))*
 				normal.inverseCumulativeProbability(p);
+	
 		return var;
 		
 	}

@@ -10,7 +10,9 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.stat.correlation.Covariance;
 import org.apache.commons.math3.stat.correlation.PearsonsCorrelation;
 
-
+import net.finmath.exception.CalculationException;
+import net.finmath.montecarlo.assetderivativevaluation.AssetModelMonteCarloSimulationInterface;
+import net.finmath.stochastic.RandomVariableInterface;
 import yahoofinance.Stock;
 import yahoofinance.histquotes.Interval;
 import yahoofinance.histquotes.HistoricalQuote;
@@ -30,7 +32,7 @@ public class Portfolio {
 	public double[][] logreturnMatrix;
 	public double[][] logreturncorrelationMatrix;
 	public double[] volatilities;
-	public double[] initialState;
+	public double[] initialStates;
 	public double portfoliovalue;
 	public ArrayList<Double> quantitiesList=new ArrayList<Double>();
 	public ArrayList<Stock> portfolio= new ArrayList<Stock>();
@@ -47,7 +49,6 @@ public class Portfolio {
 		this.portfolio.add(stock1);
 		this.numberofAssets=portfolio.size();
 		this.quantitiesList.add(quantities);
-		
 		return portfolio;
 		}
 		}
@@ -64,7 +65,7 @@ public class Portfolio {
 			this.logreturncorrelationMatrix = getLogYieldCorrelationMatrix(logreturnMatrix);
 			}
 		this.volatilities= getVolatilities(History);
-		this.initialState= getInitialState(History);
+		this.initialStates= getInitialState(History);
 		this.portfoliovalue= getPortfolioValue();
 		
 		}
@@ -102,7 +103,7 @@ public class Portfolio {
 		Covariance d = new Covariance();
 		for( int i=0; i < History.size(); i++) {
 			
-			volat[i] = Math.sqrt(d.covariance(getLogYield(History)[i], getLogYield(History)[i]));
+			volat[i] = Math.sqrt(d.covariance(getLogYield(History)[i], getLogYield(History)[i]))*Math.sqrt(252);
 		}
 		return volat;
 		}
@@ -130,16 +131,28 @@ public class Portfolio {
 		double  value=0;
 		for (int i=0;i<numberofAssets;i++){
 			
-			value+=initialState[i];
+			value+=initialStates[i];
 		}
 		return value;
 	}
+	
+	public RandomVariableInterface getSimulationsSum(AssetModelMonteCarloSimulationInterface model, int time) throws CalculationException {
+		
+		
+		RandomVariableInterface startingAsset = model.getAssetValue(time, 0);
+		for(int i=1; i< numberofAssets; i++) {
+			startingAsset.add(model.getAssetValue(time, i));
+		}
+		return startingAsset;
+		
+		
 
+	
+
+
+
+
+
+
+	}
 }
-		
-		
-		
-		
-
-	
-	

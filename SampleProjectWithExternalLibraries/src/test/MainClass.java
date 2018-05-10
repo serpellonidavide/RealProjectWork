@@ -9,8 +9,6 @@ import java.util.*;
 
 import net.finmath.exception.CalculationException;
 import net.finmath.functions.AnalyticFormulas;
-import net.finmath.montecarlo.assetderivativevaluation.products.EuropeanOption;
-import net.finmath.modelling.Model;
 import net.finmath.montecarlo.assetderivativevaluation.AssetModelMonteCarloSimulationInterface;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloBlackScholesModel;
 import net.finmath.montecarlo.assetderivativevaluation.MonteCarloMultiAssetBlackScholesModel;
@@ -24,26 +22,12 @@ import yahoofinance.Stock;
 import yahoofinance.YahooFinance;
 
 
-
-/**
- * A very simple console application showing how you can download data.
- * For more information, please refer to 
- * 
- * https://financequotes-api.com/
- * https://github.com/sstrickx/yahoofinance-api
- * 
- * 
- * @author Alessandro Gnoatto
- *
- */
 public class MainClass {
 
 	
 	public static void main(String[] args) throws IOException, CalculationException {
 		
 		CookieHandler.setDefault(new CookieManager(null, CookiePolicy.ACCEPT_ALL));
-		//https://stackoverflow.com/questions/11022934/getting-java-net-protocolexception-server-redirected-too-many-times-error
-		
 		
 		Calendar from = Calendar.getInstance();
 		Calendar to = Calendar.getInstance();
@@ -67,54 +51,64 @@ public class MainClass {
 		savings.addToPortfolio(GeneralMotors, 700);
 		
 		savings.getInfo(from, to);
+		System.out.println("Il valore iniziale del portafoglio è " + savings.portfoliovalue);
 		
 		//Linearized Loss Test
 		
-		System.out.println("Il var è " + LinearizedLoss.getVar(savings, 252, 0.95));
-		//System.out.println("La varianza è " + LinearizedLoss.Variance(savings, 252));
-		//System.out.println("La media è " + LinearizedLoss.Mean(savings, 252));
-		//System.out.println(savings.portfoliovalue);
+		System.out.println("Il var secondo la linearized loss è " + LinearizedLoss.getVar(savings, 1, 0.95));
 		
 		//MonteCarlo Var Test
 	
-		TimeDiscretizationInterface h = new TimeDiscretization(0,365,1);
-		double[] r = savings.initialState;
-		double[] v = savings.volatilities;
-		double[][] corr = savings.logreturncorrelationMatrix;
+		TimeDiscretizationInterface timediscretization = new TimeDiscretization(0,252,1.0/252);
+		double[] InitialStates = savings.initialStates;
+		double[] Volatilities = savings.volatilities;
+		double[][] Correlations = savings.logreturncorrelationMatrix;
 	
-		AssetModelMonteCarloSimulationInterface provino = new MonteCarloMultiAssetBlackScholesModel(h,20000,r,0.0,v,corr);
-		RandomVariableInterface Goog = provino.getAssetValue(252, 0);
-		RandomVariableInterface Tesl = provino.getAssetValue(252, 1);
-		RandomVariableInterface FB = provino.getAssetValue(252, 2);
-		RandomVariableInterface App = provino.getAssetValue(252, 3);
-		RandomVariableInterface GM = provino.getAssetValue(252, 4);
+		AssetModelMonteCarloSimulationInterface PortfolioModel = new MonteCarloMultiAssetBlackScholesModel(
+				timediscretization,
+				20000,
+				InitialStates,
+				0.0,
+				Volatilities,
+				Correlations);
 		
+		RandomVariableInterface Goog = PortfolioModel.getAssetValue(1.0, 0);
+		RandomVariableInterface Telsa = PortfolioModel.getAssetValue(1.0, 1);
+		RandomVariableInterface FB = PortfolioModel.getAssetValue(1.0, 2);
+		RandomVariableInterface app = PortfolioModel.getAssetValue(1.0, 3);
+		RandomVariableInterface Gen = PortfolioModel.getAssetValue(1.0, 4);
 		
+		RandomVariableInterface Somma = Goog.add(Telsa).add(FB).add(app).add(Gen);
+		System.out.println("Il var secondo MonteCarlo è " + (Somma.sub(savings.portfoliovalue)).mult(-1).getQuantile(0.05));
+		System.out.println(" ");
 		
-		RandomVariableInterface Somma = Goog.add(Tesl).add(FB).add(App).add(GM).sub(savings.portfoliovalue);
-		
-		
-		
-		System.out.println(Somma.getVariance());
-		System.out.println("Il var secondo MonteCarlo è " + ( -Somma.getQuantile(0.95)));
 		
 		//Option Valuation
 		
-		TimeDiscretizationInterface q = new TimeDiscretization(0,365,1);
-		MonteCarloBlackScholesModel prova2 = new  MonteCarloBlackScholesModel(q,20000,savings.initialState[0]/savings.quantitiesList.get(0),0,savings.volatilities[0]);
-		OptionVar Ex2 = new OptionVar(365,0);
-		System.out.println(Ex2.getValue(365,provino).getAverage());
+		StockParams GoogleParams = new StockParams("GOOG", from, to);
 		
-		System.out.println(AnalyticFormulas.blackScholesOptionValue(savings.initialState[0],0,savings.volatilities[0],365,savings.initialState[0]/savings.quantitiesList.get(0)));
-		
-		System.out.println(Ex2.getOptionPayoff(180, prova2, Google.getQuote().getPreviousClose().doubleValue()).getAverage());
-		
-		
+		MonteCarloBlackScholesModel prova2 = new  MonteCarloBlackScholesModel	//Creazione di un modello
+				(timediscretization,	
+				20000,
+				GoogleParams.InitialValue,
+				0.0,
+				GoogleParams.volatility);
 		
 		
+		OptionVar Ex2 = new OptionVar	(GoogleParams,				//Nuova istanza per calcolare misure di perdita
+										prova2,
+										1,
+										GoogleParams.InitialValue);	
 		
+		System.out.println("Il valore iniziale dell'opzione è " + AnalyticFormulas.blackScholesOptionValue (GoogleParams.InitialValue,
+																											0,
+																											GoogleParams.volatility,
+																											1,
+																											Ex2.strike));
+		System.out.println("MonteCarlo full valuation var " 	+ Ex2.getVarFullValuation(0.5, prova2));
+		System.out.println("MonteCarlo delta var " 				+ Ex2.gerVarDelta(0.5, 0.05));
+		System.out.println("MonteCarlo delta-gamma var " 		+ Ex2.gerVarDeltaGamma(0.5, 0.05));
 		
-
 	}	
 		
 	}
